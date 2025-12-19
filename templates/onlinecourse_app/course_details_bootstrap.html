@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <title>{{ course.name }} - Course Details</title>
+    <style>
+        .course-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+        }
+        .lesson-card {
+            transition: transform 0.3s;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+        }
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-mortarboard-fill me-2"></i>Online Courses</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="course-header text-center">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-book-half me-2"></i>
+                {{ course.name|default:"Course Details" }}
+            </h1>
+            {% if course.description %}
+                <p class="lead mt-3">{{ course.description }}</p>
+            {% endif %}
+        </div>
+
+        <h3 class="mt-5 mb-4"><i class="bi bi-list-check me-2"></i>Course Lessons</h3>
+        
+        {% if lessons %}
+            <div class="row">
+                {% for lesson in lessons %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card lesson-card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                {{ lesson.title }}
+                            </h5>
+                            <p class="card-text text-muted">
+                                {% if lesson.content|length > 100 %}
+                                    {{ lesson.content|slice:":100" }}...
+                                {% else %}
+                                    {{ lesson.content }}
+                                {% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">Lesson {{ forloop.counter }}</small>
+                                <button class="btn btn-sm btn-outline-primary">View</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                No lessons available for this course.
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
