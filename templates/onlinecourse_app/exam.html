@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Exam - {{ course.name }}</title>
+    <style>
+        .exam-header {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            padding: 1.5rem 0;
+        }
+        .question-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background-color: white;
+        }
+        .choice-label {
+            display: block;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .choice-label:hover {
+            background-color: #f8f9fa;
+            border-color: #86b7fe;
+        }
+        .choice-input:checked + .choice-label {
+            background-color: #e7f1ff;
+            border-color: #86b7fe;
+            font-weight: bold;
+        }
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-header">
+        <div class="container">
+            <h1><i class="bi bi-pencil-square"></i> {{ course.name }} - Exam</h1>
+            <p class="lead">Total questions: {{ total_questions }}</p>
+            <div class="timer" id="timer">Time: 30:00</div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <form method="post" action="{% url 'onlinecourse_app:submit' course.id %}">
+            {% csrf_token %}
+            
+            {% for item in exam_questions %}
+            <div class="question-card">
+                <h5>Question {{ forloop.counter }}</h5>
+                <p class="fw-bold">{{ item.question.question_text }}</p>
+                <p><small class="text-muted">Points: {{ item.question.grade }}</small></p>
+                
+                <div class="choices">
+                    {% for choice in item.choices %}
+                    <div class="mb-2">
+                        <input type="radio" 
+                               id="question_{{ item.question.id }}_choice_{{ choice.id }}"
+                               name="question_{{ item.question.id }}"
+                               value="{{ choice.id }}"
+                               class="choice-input d-none">
+                        <label for="question_{{ item.question.id }}_choice_{{ choice.id }}" 
+                               class="choice-label">
+                            {{ choice.choice_text }}
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="text-center mt-4 mb-5">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-send-check"></i> Submit Exam
+                </button>
+                <a href="{% url 'onlinecourse_app:course_details' course.id %}" 
+                   class="btn btn-outline-secondary btn-lg ms-2">
+                    <i class="bi bi-x-circle"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Timer countdown (30 minutes)
+        let timeLeft = 30 * 60; // 30 minutes in seconds
+        
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+                setTimeout(updateTimer, 1000);
+            } else {
+                document.getElementById('timer').textContent = 'Time\'s up!';
+                document.querySelector('form').submit();
+            }
+        }
+        
+        // Start timer when page loads
+        document.addEventListener('DOMContentLoaded', updateTimer);
+    </script>
+</body>
+</html>

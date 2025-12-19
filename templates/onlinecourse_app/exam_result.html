@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <title>Exam Results</title>
+    <style>
+        .result-header {
+            padding: 3rem 0;
+            text-align: center;
+        }
+        .passed {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        .failed {
+            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+            color: white;
+        }
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .result-card {
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .correct-answer {
+            border-left: 5px solid #28a745;
+            background-color: #f8fff9;
+        }
+        .incorrect-answer {
+            border-left: 5px solid #dc3545;
+            background-color: #fff8f8;
+        }
+        .badge-correct {
+            background-color: #28a745;
+        }
+        .badge-incorrect {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-header {{ 'passed' if passed else 'failed' }}">
+        <div class="container">
+            {% if passed %}
+            <h1 class="display-4"><i class="bi bi-trophy-fill"></i> Congratulations!</h1>
+            <p class="lead">You have successfully passed the exam</p>
+            {% else %}
+            <h1 class="display-4"><i class="bi bi-emoji-frown"></i> Try Again</h1>
+            <p class="lead">You need to score 70% or higher to pass</p>
+            {% endif %}
+            
+            <div class="score-circle">
+                {{ "%.1f"|format(score) }}%
+            </div>
+            
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-3 col-6">
+                    <div class="bg-white text-dark rounded-pill py-2 px-3">
+                        <i class="bi bi-check-circle"></i>
+                        <span class="fw-bold">{{ correct_answers }}</span> Correct
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="bg-white text-dark rounded-pill py-2 px-3">
+                        <i class="bi bi-x-circle"></i>
+                        <span class="fw-bold">{{ total_questions - correct_answers }}</span> Incorrect
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="bg-white text-dark rounded-pill py-2 px-3">
+                        <i class="bi bi-question-circle"></i>
+                        <span class="fw-bold">{{ total_questions }}</span> Total
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <h3 class="mb-4"><i class="bi bi-list-check"></i> Detailed Results</h3>
+        
+        {% for item in submission_data %}
+        <div class="result-card {{ 'correct-answer' if item.is_correct else 'incorrect-answer' }}">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h5>Question {{ loop.index }}</h5>
+                    <p class="mb-1"><strong>{{ item.question_text }}</strong></p>
+                    <p class="mb-1"><small>Your answer: {{ item.selected_choice }}</small></p>
+                    <p class="mb-1"><small>Correct answer: {{ item.correct_choice }}</small></p>
+                </div>
+                <div>
+                    <span class="badge {{ 'badge-correct' if item.is_correct else 'badge-incorrect' }} p-2">
+                        {% if item.is_correct %}
+                        <i class="bi bi-check-circle me-1"></i> Correct
+                        {% else %}
+                        <i class="bi bi-x-circle me-1"></i> Incorrect
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="bi bi-info-circle"></i> Submission Details</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Submission ID:</strong> {{ submission.id }}</li>
+                            <li><strong>Date:</strong> {{ completion_date }}</li>
+                            <li><strong>User:</strong> {{ user.username|default:"Guest" }}</li>
+                            {% if course %}
+                            <li><strong>Course:</strong> {{ course.name }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="bi bi-graph-up"></i> Performance Summary</h5>
+                        <div class="progress mb-2" style="height: 25px;">
+                            <div class="progress-bar bg-success" 
+                                 style="width: {{ score }}%"
+                                 role="progressbar">
+                                {{ "%.1f"|format(score) }}%
+                            </div>
+                        </div>
+                        <p class="mb-1">Passing Score: 70%</p>
+                        <p class="mb-1">Your Score: {{ "%.1f"|format(score) }}%</p>
+                        <p class="mb-0">
+                            <strong>Status:</strong> 
+                            {% if passed %}
+                            <span class="text-success">PASSED</span>
+                            {% else %}
+                            <span class="text-danger">FAILED</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5 mb-5">
+            {% if course %}
+            <a href="{% url 'onlinecourse_app:course_details' course.id %}" 
+               class="btn btn-primary btn-lg me-2">
+                <i class="bi bi-book"></i> Back to Course
+            </a>
+            {% endif %}
+            
+            <a href="/" class="btn btn-outline-secondary btn-lg me-2">
+                <i class="bi bi-house"></i> Home
+            </a>
+            
+            {% if not passed %}
+            <a href="#" class="btn btn-warning btn-lg">
+                <i class="bi bi-arrow-clockwise"></i> Retry Exam
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
