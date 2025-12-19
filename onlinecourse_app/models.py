@@ -41,5 +41,36 @@ class Submission(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.lesson.title}"
+    # Instructor model - For Task 2 requirement (7 classes)
+class Instructor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    full_time = models.BooleanField(default=True)
+    total_learners = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return self.user.username
+
+# Learner model - For Task 2 requirement (7 classes)
+class Learner(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    STUDENT = 'student'
+    DEVELOPER = 'developer'
+    DATA_SCIENTIST = 'data_scientist'
+    DATABASE_ADMIN = 'dba'
+    OCCUPATION_CHOICES = [
+        (STUDENT, 'Student'),
+        (DEVELOPER, 'Software Developer'),
+        (DATA_SCIENTIST, 'Data Scientist'),
+        (DATABASE_ADMIN, 'Database Admin')
+    ]
+    occupation = models.CharField(
+        max_length=20,
+        choices=OCCUPATION_CHOICES,
+        default=STUDENT
+    )
+    social_link = models.URLField(max_length=200, blank=True)
+    
+    def __str__(self):
+        return self.user.username
 
 # Create your models here.
